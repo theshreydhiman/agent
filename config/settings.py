@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     # ComfyUI
     comfyui_base_url: str = "http://localhost:8188"
     comfyui_output_dir: str = "/output"
+    comfyui_checkpoint_name: str = "flux1-dev.safetensors"
 
     # CogVideoX
     cogvideo_base_url: str = "http://localhost:8100"

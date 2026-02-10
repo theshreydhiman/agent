@@ -3,7 +3,7 @@
 import streamlit as st
 import httpx
 
-API_BASE = "http://localhost:8000/api"
+API_BASE = "http://api:8000/api"
 
 st.set_page_config(
     page_title="AI Influencer Agent",

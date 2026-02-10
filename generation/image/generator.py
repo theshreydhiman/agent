@@ -93,12 +93,31 @@ class ImageGenerator:
         if not negative_prompt:
             negative_prompt = get_negative_prompt()
 
+        settings = get_settings()
+
         workflow: dict[str, Any] = {
-            # -- checkpoint loader --
+            # -- UNET loader (Flux model) --
             "1": {
-                "class_type": "CheckpointLoaderSimple",
+                "class_type": "UNETLoader",
                 "inputs": {
-                    "ckpt_name": "flux1-dev.safetensors",
+                    "unet_name": "flux1-dev.safetensors",
+                    "weight_dtype": "default",
+                },
+            },
+            # -- Dual CLIP loader (T5 + CLIP-L for Flux) --
+            "8": {
+                "class_type": "DualCLIPLoader",
+                "inputs": {
+                    "clip_name1": "t5xxl_fp16.safetensors",
+                    "clip_name2": "clip_l.safetensors",
+                    "type": "flux",
+                },
+            },
+            # -- VAE loader (Flux autoencoder) --
+            "9": {
+                "class_type": "VAELoader",
+                "inputs": {
+                    "vae_name": "ae.safetensors",
                 },
             },
             # -- CLIP positive prompt --
@@ -106,15 +125,7 @@ class ImageGenerator:
                 "class_type": "CLIPTextEncode",
                 "inputs": {
                     "text": prompt,
-                    "clip": ["1", 1],
-                },
-            },
-            # -- CLIP negative prompt --
-            "3": {
-                "class_type": "CLIPTextEncode",
-                "inputs": {
-                    "text": negative_prompt,
-                    "clip": ["1", 1],
+                    "clip": ["8", 0],
                 },
             },
             # -- empty latent --
@@ -126,19 +137,19 @@ class ImageGenerator:
                     "batch_size": 1,
                 },
             },
-            # -- KSampler --
+            # -- KSampler (Flux parameters) --
             "5": {
                 "class_type": "KSampler",
                 "inputs": {
                     "model": ["1", 0],
                     "positive": ["2", 0],
-                    "negative": ["3", 0],
+                    "negative": ["2", 0],  # Flux doesn't use negative prompts
                     "latent_image": ["4", 0],
                     "seed": seed,
-                    "steps": 25,
-                    "cfg": 3.5,
+                    "steps": 20,  # Flux typically uses fewer steps
+                    "cfg": 1.0,  # Flux uses very low CFG
                     "sampler_name": "euler",
-                    "scheduler": "normal",
+                    "scheduler": "simple",
                     "denoise": 1.0,
                 },
             },
@@ -147,7 +158,7 @@ class ImageGenerator:
                 "class_type": "VAEDecode",
                 "inputs": {
                     "samples": ["5", 0],
-                    "vae": ["1", 2],
+                    "vae": ["9", 0],
                 },
             },
             # -- save image --
@@ -161,7 +172,9 @@ class ImageGenerator:
         }
 
         # -- optional IP-Adapter for reference-based generation ----------------
-        if reference_image_path is not None:
+        # NOTE: IP-Adapter is currently disabled for Flux (not yet compatible)
+        # Re-enable when Flux-compatible IP-Adapter models are available
+        if False and reference_image_path is not None:
             image_b64 = _encode_image_to_base64(reference_image_path)
 
             # Load the reference image

@@ -37,3 +37,6 @@ celery_app.conf.update(
         },
     },
 )
+
+# Import tasks to register them with Celery
+celery_app.autodiscover_tasks(["tasks"])

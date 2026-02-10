@@ -19,6 +19,8 @@ services:
     build: .
     command: celery -A tasks.celery_app worker --loglevel=info --concurrency=2
     env_file: .env
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - postgres
       - redis
@@ -28,6 +30,8 @@ services:
     build: .
     command: celery -A tasks.celery_app beat --loglevel=info
     env_file: .env
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - redis
 
@@ -49,7 +53,7 @@ services:
       POSTGRES_PASSWORD: agent
       POSTGRES_DB: influencer_agent
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -57,7 +61,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
   # MinIO for S3-compatible object storage
   minio:
@@ -67,8 +71,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9002:9000"
+      - "9003:9001"
     volumes:
       - minio_data:/data
 

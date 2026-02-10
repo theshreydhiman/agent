@@ -134,7 +134,7 @@ class ComfyUIClient:
     async def wait_for_completion(
         self,
         prompt_id: str,
-        timeout: float = 120.0,
+        timeout: float = 300.0,
         poll_interval: float = 1.0,
     ) -> dict:
         """Poll ``get_status`` until the prompt completes or *timeout* elapses.

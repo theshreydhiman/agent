@@ -3,6 +3,7 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.0
 pydantic==2.9.0
 pydantic-settings==2.5.0
+python-multipart==0.0.9
 
 # Database
 sqlalchemy==2.0.35
@@ -15,7 +16,7 @@ celery[redis]==5.4.0
 redis==5.1.0
 
 # Agent Orchestration
-langgraph==0.2.0
+langgraph==0.2.34
 langchain-core==0.3.0
 
 # LLM (local via Ollama)
